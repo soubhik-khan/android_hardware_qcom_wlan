@@ -159,10 +159,6 @@ wifi_error NanCommand::putNanEnable(transaction_id id, const NanEnableRequest *p
         (
            pReq->config_dw_early_termination ? (SIZEOF_TLV_HDR + \
            sizeof(u32)) : 0 \
-        ) + \
-        (
-          pReq->config_ndpe_attr? (SIZEOF_TLV_HDR + \
-           sizeof(NanDevCapAttrCap)) : 0 \
         );
 
     pNanEnableReqMsg pFwReq = (pNanEnableReqMsg)malloc(message_len);
@@ -341,14 +337,7 @@ wifi_error NanCommand::putNanEnable(transaction_id id, const NanEnableRequest *p
         tlvs = addTlv(NAN_TLV_TYPE_DW_EARLY_TERMINATION, sizeof(u32),
                       (const u8*)&pReq->enable_dw_termination, tlvs);
     }
-    if (pReq->config_ndpe_attr) {
-        NanDevCapAttrCap nanDevCapAttr;
-        memset(&nanDevCapAttr, 0, sizeof(nanDevCapAttr));
-        nanDevCapAttr.ndpe_attr_supp = pReq->use_ndpe_attr;
-        tlvs = addTlv(NAN_TLV_TYPE_DEV_CAP_ATTR_CAPABILITY,
-                      sizeof(NanDevCapAttrCap),
-                      (const u8*)&nanDevCapAttr, tlvs);
-    }
+
     mVendorData = (char*)pFwReq;
     mDataLen = message_len;
 
@@ -486,10 +475,6 @@ wifi_error NanCommand::putNanConfig(transaction_id id, const NanConfigRequest *p
         (
            pReq->config_dw_early_termination ? (SIZEOF_TLV_HDR + \
            sizeof(u32)) : 0 \
-        ) + \
-        (
-          pReq->config_ndpe_attr? (SIZEOF_TLV_HDR + \
-           sizeof(NanDevCapAttrCap)) : 0 \
         );
 
     if (pReq->num_config_discovery_attr) {
@@ -621,6 +606,7 @@ wifi_error NanCommand::putNanConfig(transaction_id id, const NanConfigRequest *p
     tlvs = addTlv(NAN_TLV_TYPE_CONFIG_DISCOVERY_INDICATIONS,
                   sizeof(u32),
                   (const u8*)&config_discovery_indications, tlvs);
+
     if (pReq->config_nss) {
         tlvs = addTlv(NAN_TLV_TYPE_TX_RX_CHAINS, sizeof(u32),
                       (const u8*)&pReq->nss, tlvs);
@@ -632,14 +618,6 @@ wifi_error NanCommand::putNanConfig(transaction_id id, const NanConfigRequest *p
     if (pReq->config_dw_early_termination) {
         tlvs = addTlv(NAN_TLV_TYPE_DW_EARLY_TERMINATION, sizeof(u32),
                       (const u8*)&pReq->enable_dw_termination, tlvs);
-    }
-    if (pReq->config_ndpe_attr) {
-        NanDevCapAttrCap nanDevCapAttr;
-        memset(&nanDevCapAttr, 0, sizeof(nanDevCapAttr));
-        nanDevCapAttr.ndpe_attr_supp = pReq->use_ndpe_attr;
-        tlvs = addTlv(NAN_TLV_TYPE_DEV_CAP_ATTR_CAPABILITY,
-                      sizeof(NanDevCapAttrCap),
-                      (const u8*)&nanDevCapAttr, tlvs);
     }
 
     mVendorData = (char*)pFwReq;
@@ -944,6 +922,7 @@ wifi_error NanCommand::putNanSubscribe(transaction_id id,
     message_len += \
         (pReq->num_intf_addr_present * (SIZEOF_TLV_HDR + NAN_MAC_ADDR_LEN));
 
+
     if ((pReq->key_info.key_type ==  NAN_SECURITY_KEY_INPUT_PMK) &&
         (pReq->key_info.body.pmk_info.pmk_len == NAN_PMK_INFO_LEN))
         message_len += SIZEOF_TLV_HDR + NAN_PMK_INFO_LEN;
@@ -954,6 +933,7 @@ wifi_error NanCommand::putNanSubscribe(transaction_id id,
               NAN_SECURITY_MAX_PASSPHRASE_LEN))
         message_len += SIZEOF_TLV_HDR +
                        pReq->key_info.body.passphrase_info.passphrase_len;
+
 
     pNanSubscribeServiceReqMsg pFwReq = (pNanSubscribeServiceReqMsg)malloc(message_len);
     if (pFwReq == NULL) {
